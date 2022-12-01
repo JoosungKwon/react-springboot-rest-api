@@ -1,4 +1,4 @@
-package com.programmers.kwonjoosung.BootCampRatingNet.review.model;
+package com.programmers.kwonjoosung.BootCampRatingNet.review.entity;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -10,8 +10,8 @@ import java.util.UUID;
 @Getter
 public class Review {
     private final UUID reviewId;
-    private final UUID campId;
-    private final UUID userId;
+    private final String campName;
+    private final String userNickName;
     private final String title;
     private final String comment;
     private final long rating;

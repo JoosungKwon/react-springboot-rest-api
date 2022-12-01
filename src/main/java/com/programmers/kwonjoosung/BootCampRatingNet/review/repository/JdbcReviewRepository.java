@@ -1,8 +1,6 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.review.repository;
 
-import com.programmers.kwonjoosung.BootCampRatingNet.review.model.Review;
-
-
+import com.programmers.kwonjoosung.BootCampRatingNet.review.entity.Review;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -13,38 +11,37 @@ import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
-import static com.programmers.kwonjoosung.BootCampRatingNet.error.SqlErrorMsgFormat.INSERT_FAIL;
-import static com.programmers.kwonjoosung.BootCampRatingNet.error.SqlErrorMsgFormat.SELECT_FAIL;
+import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.INSERT_FAIL;
+import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.SELECT_FAIL;
 
 @Repository
-public class JdbcReviewRepository {
-
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+public class JdbcReviewRepository implements ReviewRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcReviewRepository.class);
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public JdbcReviewRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private Map<String, Object> toParamMap(Review review) {
-        Map<String,Object> paramMap = new HashMap<>();
-        paramMap.put("review_id", review.getReviewId());
-        paramMap.put("user_id", review.getUserId());
-        paramMap.put("camp_id", review.getCampId());
+    private static Map<String, Object> toParamMap(Review review) {
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("review_id", review.getReviewId().toString());
+        paramMap.put("camp_name", review.getCampName());
+        paramMap.put("user_nick_name", review.getUserNickName());
         paramMap.put("title", review.getTitle());
-        paramMap.put("content", review.getComment());
+        paramMap.put("comment", review.getComment());
         paramMap.put("rating", review.getRating());
         paramMap.put("created_at", review.getCreatedAt());
         paramMap.put("updated_at", review.getUpdatedAt());
         return paramMap;
     }
 
-    private final RowMapper<Review> reviewRowMapper = (rs, rowNum) ->
+    private static final RowMapper<Review> reviewRowMapper = (rs, rowNum) ->
             Review.builder()
                     .reviewId(UUID.fromString(rs.getString("review_id")))
-                    .campId(UUID.fromString(rs.getString("camp_name")))
-                    .userId(UUID.fromString(rs.getString("user_nick_name")))
+                    .campName(rs.getString("camp_name"))
+                    .userNickName(rs.getString("user_nick_name"))
                     .title(rs.getString("title"))
                     .comment(rs.getString("comment"))
                     .rating(rs.getInt("rating"))
@@ -52,10 +49,12 @@ public class JdbcReviewRepository {
                     .updatedAt(rs.getTimestamp("updated_at").toLocalDateTime())
                     .build();
 
+    @Override
     public Review save(Review review) {
         try {
-            jdbcTemplate.update("INSERT INTO camp_review (review_id, camp_name, user_nick_name, title, comment, rating,created_at, updated_at) " +
-                    "VALUES (:review_id, :camp_name, :user_nick_name, :title, :comment, :rating, :created_at, :updated_at)", toParamMap(review));
+            final String sql = "INSERT INTO camp_review (review_id, camp_name, user_nick_name, title, comment, rating,created_at, updated_at) " +
+                    "VALUES (:review_id, :camp_name, :user_nick_name, :title, :comment, :rating, :created_at, :updated_at)";
+            jdbcTemplate.update(sql, toParamMap(review));
             return review;
         } catch (DuplicateKeyException e) {
             logger.error(INSERT_FAIL.getMessage(), e.getMessage());
@@ -63,27 +62,40 @@ public class JdbcReviewRepository {
         }
     }
 
+    @Override
     public Optional<Review> findByNickName(String nickName) {
-        try{
-            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM camp_review WHERE user_nick_name = :user_nick_name",
-                    Map.of("user_nick_name",nickName),reviewRowMapper));
-        } catch (EmptyResultDataAccessException e){
+        final String sql = "SELECT * FROM camp_review WHERE user_nick_name = :user_nick_name";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql,
+                    Map.of("user_nick_name", nickName), reviewRowMapper));
+        } catch (EmptyResultDataAccessException e) {
             logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }
 
+    @Override
     public Optional<Review> findByCampName(String campName) {
-        try{
-            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM camp_review WHERE camp_name = :camp_name",
-                    Map.of("camp_name",campName),reviewRowMapper));
-        } catch (EmptyResultDataAccessException e){
+        final String sql = "SELECT * FROM camp_review WHERE camp_name = :camp_name";
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sql,
+                            Map.of("camp_name", campName), reviewRowMapper));
+        } catch (EmptyResultDataAccessException e) {
             logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }
 
+    @Override
     public List<Review> findAll() { // try-catch?
-        return jdbcTemplate.query("SELECT * FROM camp_review", reviewRowMapper);
+        final String sql = "SELECT * FROM camp_review";
+        return jdbcTemplate.query(sql, reviewRowMapper);
+    }
+
+    @Override
+    public void deleteByReviewId(UUID reviewID) {
+        final String sql = "DELETE FROM camp_review WHERE review_id = :review_id";
+        jdbcTemplate.update(sql, Map.of("review_id", reviewID.toString()));
     }
 }
