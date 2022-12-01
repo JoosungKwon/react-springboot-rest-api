@@ -1,8 +1,7 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.bootcamp.repository;
 
 import com.programmers.kwonjoosung.BootCampRatingNet.bootcamp.entity.BootCamp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -14,17 +13,17 @@ import java.util.*;
 import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.INSERT_FAIL;
 import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.SELECT_FAIL;
 
+@Slf4j
 @Repository
 public class JdbcBootCampRepository implements BootCampRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(JdbcBootCampRepository.class);
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public JdbcBootCampRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private Map<String, Object> toParamMap(BootCamp bootCamp) {
+    private static Map<String, Object> toParamMap(BootCamp bootCamp) {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("camp_id", bootCamp.getCampId().toString());
         paramMap.put("name", bootCamp.getName());
@@ -33,7 +32,7 @@ public class JdbcBootCampRepository implements BootCampRepository {
         return paramMap;
     }
 
-    private final RowMapper<BootCamp> bootCampRowMapper = (rs, rowNum) ->
+    private static final RowMapper<BootCamp> bootCampRowMapper = (rs, rowNum) ->
             BootCamp.builder()
                     .campId(UUID.fromString(rs.getString("camp_id")))
                     .name(rs.getString("name"))
@@ -49,7 +48,7 @@ public class JdbcBootCampRepository implements BootCampRepository {
             jdbcTemplate.update(sql, toParamMap(bootCamp));
             return bootCamp;
         } catch (DuplicateKeyException e) {
-            logger.error(INSERT_FAIL.getMessage(), e.getMessage());
+            log.error(INSERT_FAIL.getMessage(), e.getMessage());
             throw e;
         }
     }
@@ -61,7 +60,7 @@ public class JdbcBootCampRepository implements BootCampRepository {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql,
                     Map.of("camp_id", campId.toString()), bootCampRowMapper));
         } catch (EmptyResultDataAccessException e) {
-            logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
+            log.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }
@@ -73,7 +72,7 @@ public class JdbcBootCampRepository implements BootCampRepository {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql,
                     Map.of("name", campName), bootCampRowMapper));
         } catch (EmptyResultDataAccessException e) {
-            logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
+            log.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }

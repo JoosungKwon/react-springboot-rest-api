@@ -1,9 +1,9 @@
 CREATE TABLE bootcamp
 (
-    camp_id  varchar(255) NOT NULL PRIMARY KEY,
-    name     varchar(30)  NOT NULL,
-    location varchar(50)  NOT NULL,
-    description (1000) NOT NULL,
+    camp_id     varchar(255)  NOT NULL PRIMARY KEY,
+    name        varchar(30)   NOT NULL,
+    location    varchar(50)   NOT NULL,
+    description varchar(1000) NOT NULL
 );
 
 CREATE TABLE user
@@ -14,7 +14,7 @@ CREATE TABLE user
     email     varchar(30)  NOT NULL,
     phone     varchar(13)  NOT NULL UNIQUE,
     address   varchar(50)  NOT NULL,
-    bootcamp  varchar(30) NULL
+    bootcamp  varchar(30)  NULL
 );
 
 CREATE TABLE camp_review

@@ -1,8 +1,7 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.review.repository;
 
 import com.programmers.kwonjoosung.BootCampRatingNet.review.entity.Review;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -14,10 +13,10 @@ import java.util.*;
 import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.INSERT_FAIL;
 import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.SELECT_FAIL;
 
+@Slf4j
 @Repository
 public class JdbcReviewRepository implements ReviewRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(JdbcReviewRepository.class);
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public JdbcReviewRepository(NamedParameterJdbcTemplate jdbcTemplate) {
@@ -57,7 +56,7 @@ public class JdbcReviewRepository implements ReviewRepository {
             jdbcTemplate.update(sql, toParamMap(review));
             return review;
         } catch (DuplicateKeyException e) {
-            logger.error(INSERT_FAIL.getMessage(), e.getMessage());
+            log.error(INSERT_FAIL.getMessage(), e.getMessage());
             throw e;
         }
     }
@@ -69,7 +68,7 @@ public class JdbcReviewRepository implements ReviewRepository {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql,
                     Map.of("user_nick_name", nickName), reviewRowMapper));
         } catch (EmptyResultDataAccessException e) {
-            logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
+            log.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }
@@ -82,7 +81,7 @@ public class JdbcReviewRepository implements ReviewRepository {
                     jdbcTemplate.queryForObject(sql,
                             Map.of("camp_name", campName), reviewRowMapper));
         } catch (EmptyResultDataAccessException e) {
-            logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
+            log.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }

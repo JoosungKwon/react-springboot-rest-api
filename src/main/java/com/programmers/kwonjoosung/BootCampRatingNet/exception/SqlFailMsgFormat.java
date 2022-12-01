@@ -1,6 +1,6 @@
-package com.programmers.kwonjoosung.BootCampRatingNet.error;
+package com.programmers.kwonjoosung.BootCampRatingNet.exception;
 
-public enum SqlErrorMsgFormat {
+public enum SqlFailMsgFormat {
 
     INSERT_FAIL("[INSERT FAIL] {}"),
     SELECT_FAIL("[SELECT FAIL] {}"),
@@ -9,7 +9,7 @@ public enum SqlErrorMsgFormat {
 
     private final String message;
 
-    SqlErrorMsgFormat(String message) {
+    SqlFailMsgFormat(String message) {
         this.message = message;
     }
 
