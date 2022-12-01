@@ -10,8 +10,8 @@ import java.util.UUID;
 @Builder
 public class BootCamp {
     private final UUID campId;
-    private final String campName;
-    private String campLocation;
-    private String campDescription;
+    private final String name;
+    private String location;
+    private String description;
     private List<Review> reviews;
 }
