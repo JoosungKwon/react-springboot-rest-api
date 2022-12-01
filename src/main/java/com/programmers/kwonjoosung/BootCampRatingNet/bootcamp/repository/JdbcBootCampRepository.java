@@ -1,6 +1,6 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.bootcamp.repository;
 
-import com.programmers.kwonjoosung.BootCampRatingNet.bootcamp.model.BootCamp;
+import com.programmers.kwonjoosung.BootCampRatingNet.bootcamp.entity.BootCamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -11,25 +11,22 @@ import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
-import static com.programmers.kwonjoosung.BootCampRatingNet.error.SqlErrorMsgFormat.INSERT_FAIL;
-import static com.programmers.kwonjoosung.BootCampRatingNet.error.SqlErrorMsgFormat.SELECT_FAIL;
+import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.INSERT_FAIL;
+import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.SELECT_FAIL;
 
 @Repository
-public class JdbcBootCampRepository {
-
-    private final NamedParameterJdbcTemplate jdbcTemplate;
+public class JdbcBootCampRepository implements BootCampRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcBootCampRepository.class);
-
-    private static final int FAIL = 0;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public JdbcBootCampRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
     private Map<String, Object> toParamMap(BootCamp bootCamp) {
-        Map<String,Object> paramMap = new HashMap<>();
-        paramMap.put("camp_id", bootCamp.getCampId());
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("camp_id", bootCamp.getCampId().toString());
         paramMap.put("name", bootCamp.getName());
         paramMap.put("location", bootCamp.getLocation());
         paramMap.put("description", bootCamp.getDescription());
@@ -44,10 +41,12 @@ public class JdbcBootCampRepository {
                     .description(rs.getString("description"))
                     .build();
 
+    @Override
     public BootCamp save(BootCamp bootCamp) {
+        final String sql = "INSERT INTO bootcamp (camp_id, name, location, description) " +
+                "VALUES (:camp_id, :name, :location, :description)";
         try {
-            jdbcTemplate.update("INSERT INTO bootcamp (camp_id, name, location, description) " +
-                    "VALUES (:camp_id, :name, :location, :description)", toParamMap(bootCamp));
+            jdbcTemplate.update(sql, toParamMap(bootCamp));
             return bootCamp;
         } catch (DuplicateKeyException e) {
             logger.error(INSERT_FAIL.getMessage(), e.getMessage());
@@ -55,27 +54,39 @@ public class JdbcBootCampRepository {
         }
     }
 
-    public Optional<BootCamp> findByCampId(String campId) {
-        try{
-            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM bootcamp WHERE camp_id = :camp_id",
-                    Map.of("camp_id",campId),bootCampRowMapper));
-        } catch (EmptyResultDataAccessException e){
+    @Override
+    public Optional<BootCamp> findByCampId(UUID campId) {
+        final String sql = "SELECT * FROM bootcamp WHERE camp_id = :camp_id";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql,
+                    Map.of("camp_id", campId.toString()), bootCampRowMapper));
+        } catch (EmptyResultDataAccessException e) {
             logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }
 
+    @Override
     public Optional<BootCamp> findByCampName(String campName) {
-        try{
-            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM bootcamp WHERE name = :name",
-                    Map.of("name",campName),bootCampRowMapper));
-        } catch (EmptyResultDataAccessException e){
+        final String sql = "SELECT * FROM bootcamp WHERE name = :name";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql,
+                    Map.of("name", campName), bootCampRowMapper));
+        } catch (EmptyResultDataAccessException e) {
             logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }
 
+    @Override
     public List<BootCamp> findAll() { // try-catch?
-        return jdbcTemplate.query("SELECT * FROM bootcamp", bootCampRowMapper);
+        final String sql = "SELECT * FROM bootcamp";
+        return jdbcTemplate.query(sql, bootCampRowMapper);
+    }
+
+    @Override
+    public void deleteByCampId(UUID campId) {
+        final String sql = "DELETE FROM bootcamp WHERE camp_id = :camp_id";
+        jdbcTemplate.update(sql, Map.of("camp_id", campId.toString()));
     }
 }
