@@ -1,5 +1,6 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.bootcamp.model;
 
+import com.programmers.kwonjoosung.BootCampRatingNet.review.model.Review;
 import lombok.Builder;
 import lombok.Getter;
 
