@@ -1,9 +1,8 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.user.repository;
 
-import com.programmers.kwonjoosung.BootCampRatingNet.user.model.Email;
-import com.programmers.kwonjoosung.BootCampRatingNet.user.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.programmers.kwonjoosung.BootCampRatingNet.user.entity.Email;
+import com.programmers.kwonjoosung.BootCampRatingNet.user.entity.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -13,18 +12,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
-import static com.programmers.kwonjoosung.BootCampRatingNet.error.SqlErrorMsgFormat.INSERT_FAIL;
-import static com.programmers.kwonjoosung.BootCampRatingNet.error.SqlErrorMsgFormat.SELECT_FAIL;
+import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.INSERT_FAIL;
+import static com.programmers.kwonjoosung.BootCampRatingNet.exception.SqlFailMsgFormat.SELECT_FAIL;
 
+@Slf4j
 @Repository
-public class JdbcUserRepository {
+public class JdbcUserRepository implements UserRepository {
     
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    private static final Logger logger = LoggerFactory.getLogger(JdbcUserRepository.class);
-    
-
-    
     public JdbcUserRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -50,38 +46,47 @@ public class JdbcUserRepository {
                     .address(rs.getString("address"))
                     .build();
 
+    @Override
     public User save(User user) {
+        final String sql = "INSERT INTO user (user_id, nick_name, email, password, phone, address) " +
+                "VALUES (:user_id, :nick_name, :email, :password, :phone, :address)";
         try {
-            jdbcTemplate.update("INSERT INTO user (user_id, nick_name, email, password, phone, address) " +
-                    "VALUES (:user_id, :nick_name, :email, :password, :phone, :address)", toParamMap(user));
+            jdbcTemplate.update(sql, toParamMap(user));
             return user;
         } catch (DuplicateKeyException e) {
-            logger.error(INSERT_FAIL.getMessage(), e.getMessage());
+            log.error(INSERT_FAIL.getMessage(), e.getMessage());
             throw e;
         }
     }
 
+    @Override
     public Optional<User> findByUserId(String userId) {
+        final String sql = "SELECT * FROM user WHERE user_id = :user_id";
         try{
-            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM user WHERE user_id = :user_id",
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql,
                     Map.of("user_id",userId),userRowMapper));
         } catch (EmptyResultDataAccessException e){
-            logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
+            log.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }
 
+    @Override
     public Optional<User> findByNickName(String nickName) {
+        final String sql = "SELECT * FROM user WHERE nick_name = :nick_name";
         try{
-            return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT * FROM user WHERE nick_name = :nick_name",
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql,
                     Map.of("nick_name",nickName),userRowMapper));
         } catch (EmptyResultDataAccessException e){
-            logger.warn(SELECT_FAIL.getMessage(), e.getMessage());
+            log.warn(SELECT_FAIL.getMessage(), e.getMessage());
             return Optional.empty();
         }
     }
 
-    public List<User> findAll() { // try-catch?
-        return jdbcTemplate.query("SELECT * FROM user", userRowMapper);
+    @Override
+    public void deleteUser(UUID userId, String password) {
+        final String sql = "DELETE FROM user WHERE user_id = :user_id AND password = :password";
+        jdbcTemplate.update(sql,
+                Map.of("user_id",userId.toString(),"password",password));
     }
 }

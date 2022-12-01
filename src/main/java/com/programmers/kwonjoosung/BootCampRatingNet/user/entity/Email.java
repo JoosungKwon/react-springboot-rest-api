@@ -1,4 +1,4 @@
-package com.programmers.kwonjoosung.BootCampRatingNet.user.model;
+package com.programmers.kwonjoosung.BootCampRatingNet.user.entity;
 
 import org.springframework.util.Assert;
 

@@ -1,22 +1,19 @@
-package com.programmers.kwonjoosung.BootCampRatingNet.user.model;
+package com.programmers.kwonjoosung.BootCampRatingNet.user.entity;
 
-import com.programmers.kwonjoosung.BootCampRatingNet.review.model.Review;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.List;
 import java.util.UUID;
 
 
 @Builder
 @Getter
-public class User {
+public class User { // 여기서 final이 가지는 의미는 뭘까?
     private final UUID userId;
     private final String nickName;
     private final String password;
     private final Email email;
     private final String phone;
-    private final String address;
+    private String address;
     private String bootCamp;
-    private List<Review> reviews;
 }
