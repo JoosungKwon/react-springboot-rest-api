@@ -1,8 +1,11 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.user.utils;
 
 import com.programmers.kwonjoosung.BootCampRatingNet.user.dto.CreateUserRequest;
-import com.programmers.kwonjoosung.BootCampRatingNet.user.dto.UserResponseDto;
+import com.programmers.kwonjoosung.BootCampRatingNet.user.dto.UserResponse;
+import com.programmers.kwonjoosung.BootCampRatingNet.user.entity.Email;
 import com.programmers.kwonjoosung.BootCampRatingNet.user.entity.User;
+
+import java.util.UUID;
 
 public class UserConverter {
 
@@ -11,22 +14,21 @@ public class UserConverter {
 
     public static User toUser(CreateUserRequest request) {
         return User.builder()
+                .userId(UUID.randomUUID())
                 .nickName(request.getNickName())
                 .password(request.getPassword())
-                .email(request.getEmail())
+                .email(new Email(request.getEmail()))
                 .phone(request.getPhone())
-                .address(request.getAddress())
                 .bootCamp(request.getBootCamp())
                 .build();
     }
 
-    public static UserResponseDto toResponse(User user) {
-        return UserResponseDto.builder()
+    public static UserResponse toResponse(User user) {
+        return UserResponse.builder()
                 .userId(user.getUserId().toString())
                 .nickName(user.getNickName())
                 .email(user.getEmail().getAddress())
                 .phone(user.getPhone())
-                .address(user.getAddress())
                 .bootCamp(user.getBootCamp())
                 .build();
     }

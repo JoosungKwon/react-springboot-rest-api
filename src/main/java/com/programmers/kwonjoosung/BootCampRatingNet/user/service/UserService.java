@@ -1,18 +1,19 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.user.service;
 
 import com.programmers.kwonjoosung.BootCampRatingNet.user.dto.CreateUserRequest;
-import com.programmers.kwonjoosung.BootCampRatingNet.user.dto.UserResponseDto;
+import com.programmers.kwonjoosung.BootCampRatingNet.user.dto.DeleteUserRequest;
+import com.programmers.kwonjoosung.BootCampRatingNet.user.dto.UserResponse;
 
 import java.util.UUID;
 
 public interface UserService {
 
-    UserResponseDto createUser(CreateUserRequest request);
+    UserResponse createUser(CreateUserRequest request);
 
-    UserResponseDto findUserByUserId(UUID userId);
+    UserResponse findByUserId(UUID userId);
 
-    UserResponseDto findByNickName(String nickName);
+    UserResponse findByNickName(String nickName);
 
-    void deleteUser(UUID userId, String password);
+    void deleteUser(DeleteUserRequest request);
 
 }

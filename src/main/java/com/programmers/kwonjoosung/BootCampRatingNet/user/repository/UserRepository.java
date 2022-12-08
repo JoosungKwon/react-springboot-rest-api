@@ -9,10 +9,11 @@ public interface UserRepository {
 
     User save(User user);
 
-    Optional<User> findByUserId(String userId);
+    Optional<User> findByUserId(UUID userId);
 
     Optional<User> findByNickName(String nickName);
 
     void deleteUser(UUID userId, String password);
 
+    Optional<User> findByNickNameAndPassword(String NickName, String password);
 }
