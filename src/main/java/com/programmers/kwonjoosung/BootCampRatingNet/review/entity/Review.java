@@ -9,12 +9,11 @@ import java.util.UUID;
 @Builder
 @Getter
 public class Review {
-    private final UUID reviewId;
-    private final String campName;
-    private final String userNickName;
-    private final String title;
-    private final String comment;
-    private final long rating;
-    private final LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private UUID reviewId;
+    private UUID userId;
+    private UUID campId;
+    private String title;
+    private String content;
+    private long rating;
+    private LocalDateTime createdAt;
 }
