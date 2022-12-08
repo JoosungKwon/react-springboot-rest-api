@@ -1,12 +1,14 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.bootcamp.dto;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 @Getter
-public class BootCampResponseDto {
+@Builder
+public class BootCampInfoResponse {
+    private final String campId;
     private final String name;
-    private final String location;
     private final String description;
+    private final String image;
+    private double rating;
 }

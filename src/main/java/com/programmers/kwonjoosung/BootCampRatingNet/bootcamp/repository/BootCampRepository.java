@@ -10,9 +10,7 @@ public interface BootCampRepository {
 
     BootCamp save(BootCamp bootCamp);
 
-    Optional<BootCamp> findByCampId(UUID campId);
-
-    Optional<BootCamp> findByCampName(String campName);
+    Optional<BootCamp> findByCampIdWithReviews(UUID campId);
 
     List<BootCamp> findAll();
 

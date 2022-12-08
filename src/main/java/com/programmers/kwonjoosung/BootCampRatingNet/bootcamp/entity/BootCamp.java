@@ -1,8 +1,10 @@
 package com.programmers.kwonjoosung.BootCampRatingNet.bootcamp.entity;
 
+import com.programmers.kwonjoosung.BootCampRatingNet.review.entity.Review;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -10,8 +12,11 @@ import java.util.UUID;
 public class BootCamp {
     private final UUID campId;
     private final String name;
-    private String location;
     private String description;
-//    private long rating;
-//    private List<Review> reviews; -> 어떻게 추후에 setting 하게 할것인가?
+    private String image;
+    private List<Review> reviews;
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
 }
